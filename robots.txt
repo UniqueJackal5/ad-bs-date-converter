@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://uniquejackal5-adbs.netlify.app/sitemap.xml
