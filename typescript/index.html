@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepali Date Converter (AD/BS)</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 400px; text-align: center; }
+        h1 { color: #2c3e50; font-size: 1.5rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        label { display: block; font-weight: 600; margin-bottom: 0.4rem; color: #34495e; }
+        input, select { width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { background-color: #3498db; color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer; width: 100%; font-size: 1rem; margin-top: 1rem; transition: background 0.3s; }
+        button:hover { background-color: #2980b9; }
+        #result { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; background: #e8f4fd; color: #2980b9; font-weight: 600; min-height: 20px; }
+        .mode-toggle { margin-bottom: 1rem; display: flex; gap: 10px; }
+        .mode-toggle span { flex: 1; padding: 8px; cursor: pointer; border: 1px solid #3498db; border-radius: 6px; color: #3498db; }
+        .mode-toggle span.active { background: #3498db; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>AD to BS Converter</h1>
+    
+    <div class="mode-toggle">
+        <span id="btnADtoBS" class="active">AD to BS</span>
+        <span id="btnBStoAD">BS to AD</span>
+    </div>
+
+    <div class="form-group">
+        <label id="dateLabel">Select AD Date:</label>
+        <input type="date" id="dateInput">
+    </div>
+
+    <button id="convertBtn">Convert Now</button>
+
+    <div id="result">Select a date and click convert</div>
+</div>
+
+<script src="converter.js"></script>
+<script>
+    const dateInput = document.getElementById('dateInput');
+    const convertBtn = document.getElementById('convertBtn');
+    const resultDiv = document.getElementById('result');
+    const btnADtoBS = document.getElementById('btnADtoBS');
+    const btnBStoAD = document.getElementById('btnBStoAD');
+    const title = document.querySelector('h1');
+    const label = document.getElementById('dateLabel');
+
+    let mode = 'ADtoBS';
+
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+
+    btnADtoBS.onclick = () => {
+        mode = 'ADtoBS';
+        btnADtoBS.classList.add('active');
+        btnBStoAD.classList.remove('active');
+        title.innerText = 'AD to BS Converter';
+        label.innerText = 'Select AD Date:';
+        dateInput.type = 'date';
+    };
+
+    btnBStoAD.onclick = () => {
+        mode = 'BStoAD';
+        btnBStoAD.classList.add('active');
+        btnADtoBS.classList.remove('active');
+        title.innerText = 'BS to AD Converter';
+        label.innerText = 'Enter BS Date (YYYY-MM-DD):';
+        dateInput.type = 'text';
+        dateInput.placeholder = '2080-07-10';
+        dateInput.value = '2080-07-10';
+    };
+
+    convertBtn.onclick = () => {
+        let res;
+        if (mode === 'ADtoBS') {
+            const [y, m, d] = dateInput.value.split('-').map(Number);
+            res = adToBs(y, m, d);
+            if (res) {
+                resultDiv.innerText = `${res.dayName}, ${res.monthName} ${res.day}, ${res.year} BS`;
+            } else {
+                resultDiv.innerText = "Date out of range (1944-2033 AD)";
+            }
+        } else {
+            const [y, m, d] = dateInput.value.split('-').map(Number);
+            res = bs_to_ad_wrapper(y, m, d); // Using a wrapper because BS input is tricky
+            if (res) {
+                resultDiv.innerText = `${res.dayName}, ${res.monthName} ${res.day}, ${res.year} AD`;
+            } else {
+                resultDiv.innerText = "Date out of range (2000-2090 BS)";
+            }
+        }
+    };
+
+    function bs_to_ad_wrapper(y, m, d) {
+        if (!y || !m || !d) return null;
+        return bsToAd(y, m, d);
+    }
+</script>
+
+</body>
+</html>
