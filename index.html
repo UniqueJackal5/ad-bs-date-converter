@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepali Date Converter | AD to BS & BS to AD | Bikram Sambat</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Quickly convert English (AD) dates to Nepali (BS) Bikram Sambat dates and vice versa. Free, accurate, and mobile-friendly Nepali date converter.">
+    <meta name="keywords" content="Nepali Date Converter, AD to BS, BS to AD, Bikram Sambat, Nepali Calendar, Convert English Date to Nepali, नेपाली मिति रूपान्तरण">
+    <meta name="author" content="UniqueJackal5">
+    
+    <!-- OpenGraph Tags -->
+    <meta property="og:title" content="Nepali Date Converter | AD to BS & BS to AD">
+    <meta property="og:description" content="The most accurate tool for Bikram Sambat conversion.">
+    <meta property="og:type" content="website">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="app-container">
+        <div class="lang-toggle">
+            <button id="btnEn" class="active">EN</button>
+            <button id="btnNe">नेपाली</button>
+        </div>
+
+        <h1 id="title">Date Converter</h1>
+
+        <div class="mode-selector">
+            <button id="modeADtoBS" class="active">AD ➜ BS</button>
+            <button id="modeBStoAD">BS ➜ AD</button>
+        </div>
+
+        <section class="converter-form">
+            <div class="form-group">
+                <label id="dateLabel" for="dateInput">Select AD Date:</label>
+                <input type="date" id="dateInput">
+            </div>
+
+            <button id="convertBtn" class="convert-btn">Convert Date</button>
+        </section>
+
+        <section id="result-display" style="display: none;">
+            <div id="resultLabel" class="result-label">Converted Date:</div>
+            <div id="resultValue" class="result-value"></div>
+        </section>
+
+        <footer class="footer-credits">
+            Based on logic by <a href="https://github.com/dioveath/ad-bs-date-converter" target="_blank" rel="noopener">dioveath</a>.
+        </footer>
+    </main>
+
+    <script src="converter.js"></script>
+    <script>
+        const dateInput = document.getElementById('dateInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultDisplay = document.getElementById('result-display');
+        const resultValue = document.getElementById('resultValue');
+        const resultLabel = document.getElementById('resultLabel');
+        const title = document.getElementById('title');
+        const dateLabel = document.getElementById('dateLabel');
+        
+        const modeADtoBS = document.getElementById('modeADtoBS');
+        const modeBStoAD = document.getElementById('modeBStoAD');
+        const btnEn = document.getElementById('btnEn');
+        const btnNe = document.getElementById('btnNe');
+
+        let currentMode = 'ADtoBS';
+        let currentLang = 'EN';
+
+        const UI_TEXT = {
+            EN: {
+                title: "Date Converter",
+                adToBs: "AD ➜ BS",
+                bsToAd: "BS ➜ AD",
+                labelAD: "Select AD Date:",
+                labelBS: "Enter BS Date (YYYY-MM-DD):",
+                btnConvert: "Convert Date",
+                resultLabel: "Converted Date:",
+                errorRangeAD: "Range: 1944-2033 AD",
+                errorRangeBS: "Range: 2000-2090 BS",
+                invalidDate: "Invalid Date Format"
+            },
+            NE: {
+                title: "मिति रूपान्तरण",
+                adToBs: "ई.सं ➜ वि.सं",
+                bsToAd: "वि.सं ➜ ई.सं",
+                labelAD: "ई.सं मिति रोज्नुहोस्:",
+                labelBS: "वि.सं मिति (YYYY-MM-DD):",
+                btnConvert: "रूपान्तरण गर्नुहोस्",
+                resultLabel: "रूपान्तरित मिति:",
+                errorRangeAD: "सीमा: १९४४-२०३३ ई.सं",
+                errorRangeBS: "सीमा: २०००-२०९० वि.सं",
+                invalidDate: "गलत मिति ढाँचा"
+            }
+        };
+
+        function updateUI() {
+            const lang = UI_TEXT[currentLang];
+            title.innerText = lang.title;
+            modeADtoBS.innerText = lang.adToBs;
+            modeBStoAD.innerText = lang.bsToAd;
+            convertBtn.innerText = lang.btnConvert;
+            resultLabel.innerText = lang.resultLabel;
+            
+            if (currentMode === 'ADtoBS') {
+                dateLabel.innerText = lang.labelAD;
+                dateInput.type = 'date';
+            } else {
+                dateLabel.innerText = lang.labelBS;
+                dateInput.type = 'text';
+                dateInput.placeholder = currentLang === 'EN' ? '2080-07-10' : '२०८०-०७-१०';
+            }
+            resultDisplay.style.display = 'none';
+        }
+
+        modeADtoBS.onclick = () => {
+            currentMode = 'ADtoBS';
+            modeADtoBS.classList.add('active');
+            modeBStoAD.classList.remove('active');
+            updateUI();
+        };
+
+        modeBStoAD.onclick = () => {
+            currentMode = 'BStoAD';
+            modeBStoAD.classList.add('active');
+            modeADtoBS.classList.remove('active');
+            updateUI();
+        };
+
+        btnEn.onclick = () => {
+            currentLang = 'EN';
+            btnEn.classList.add('active');
+            btnNe.classList.remove('active');
+            updateUI();
+        };
+
+        btnNe.onclick = () => {
+            currentLang = 'NE';
+            btnNe.classList.add('active');
+            btnEn.classList.remove('active');
+            updateUI();
+        };
+
+        convertBtn.onclick = () => {
+            let res;
+            const val = dateInput.value;
+            if (!val) return;
+
+            if (currentMode === 'ADtoBS') {
+                const [y, m, d] = val.split('-').map(Number);
+                res = adToBs(y, m, d);
+                if (res) {
+                    if (currentLang === 'EN') {
+                        resultValue.innerText = `${res.dayName}, ${res.monthName} ${res.day}, ${res.year} BS`;
+                    } else {
+                        resultValue.innerText = `${res.dayNameNe}, ${res.monthNameNe} ${res.dayNe}, ${res.yearNe} वि.सं`;
+                    }
+                } else {
+                    resultValue.innerText = UI_TEXT[currentLang].errorRangeAD;
+                }
+            } else {
+                // Handle BS to AD
+                const parts = val.split('-').map(Number);
+                if (parts.length !== 3) {
+                    resultValue.innerText = UI_TEXT[currentLang].invalidDate;
+                } else {
+                    res = bsToAd(parts[0], parts[1], parts[2]);
+                    if (res) {
+                        if (currentLang === 'EN') {
+                            resultValue.innerText = `${res.dayName}, ${res.monthName} ${res.day}, ${res.year} AD`;
+                        } else {
+                            resultValue.innerText = `${res.dayNameNe}, ${res.monthNameNe} ${res.dayNe}, ${res.yearNe} ई.सं`;
+                        }
+                    } else {
+                        resultValue.innerText = UI_TEXT[currentLang].errorRangeBS;
+                    }
+                }
+            }
+            resultDisplay.style.display = 'block';
+        };
+
+        // Initialize today's date
+        dateInput.value = new Date().toISOString().split('T')[0];
+        updateUI();
+    </script>
+</body>
+</html>

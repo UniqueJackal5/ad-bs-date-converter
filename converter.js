@@ -18,9 +18,26 @@ const BS_MONTH_NAMES = [
   "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"
 ];
 
+const BS_MONTH_NAMES_NE = [
+  "", "वैशाख", "जेठ", "असार", "साउन", "भदौ", "असोज",
+  "कात्तिक", "मंसिर", "पुस", "माघ", "फागुन", "चैत"
+];
+
 const DAYS = [
   "", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 ];
+
+const DAYS_NE = [
+  "", "आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहीबार", "शुक्रबार", "शनिबार"
+];
+
+const NE_DIGITS = ["०", "१", "२", "३", "४", "५", "६", "७", "८", "९"];
+
+function toNepaliDigits(num) {
+  return num.toString().split('').map(digit => {
+    return NE_DIGITS[parseInt(digit)] || digit;
+  }).join('');
+}
 
 const BS_DATA = [
   [2000, 30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31],
@@ -145,12 +162,17 @@ function adToBs(year, month, day) {
     }
     totalDays--;
   }
+  const nepYear = BS_DATA[nepYearIndex][0];
   return {
-    year: BS_DATA[nepYearIndex][0],
+    year: nepYear,
     month: nepMonth,
     day: nepDay,
     dayName: DAYS[dayOfWeek],
-    monthName: BS_MONTH_NAMES[nepMonth]
+    dayNameNe: DAYS_NE[dayOfWeek],
+    monthName: BS_MONTH_NAMES[nepMonth],
+    monthNameNe: BS_MONTH_NAMES_NE[nepMonth],
+    yearNe: toNepaliDigits(nepYear),
+    dayNe: toNepaliDigits(nepDay)
   };
 }
 
@@ -180,6 +202,10 @@ function bsToAd(year, month, day) {
     month: engMonth,
     day: engDay,
     dayName: DAYS[dayOfWeek],
-    monthName: AD_MONTH_NAMES[engMonth]
+    dayNameNe: DAYS_NE[dayOfWeek],
+    monthName: AD_MONTH_NAMES[engMonth],
+    monthNameNe: AD_MONTH_NAMES[engMonth], // AD months usually stay English even in Nepali context but could be transliterated
+    yearNe: toNepaliDigits(engYear),
+    dayNe: toNepaliDigits(engDay)
   };
 }
