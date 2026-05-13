@@ -107,10 +107,22 @@
             if (currentMode === 'ADtoBS') {
                 dateLabel.innerText = lang.labelAD;
                 dateInput.type = 'date';
+                // If switching from BS to AD, reset to today's date
+                if (dateInput.value.length > 10 || (dateInput.value && !dateInput.value.includes('-'))) {
+                   dateInput.value = new Date().toISOString().split('T')[0];
+                }
             } else {
                 dateLabel.innerText = lang.labelBS;
                 dateInput.type = 'text';
-                dateInput.placeholder = currentLang === 'EN' ? '2080-07-10' : '२०८०-०७-१०';
+                dateInput.placeholder = currentLang === 'EN' ? '2081-01-01' : '२०८१-०१-०१';
+                
+                // If it looks like an AD date (YYYY-MM-DD), set a relevant BS example
+                if (dateInput.value.startsWith('19') || dateInput.value.startsWith('20')) {
+                    const parts = dateInput.value.split('-');
+                    if (parts[0] < 2034) { // It's likely an AD year
+                        dateInput.value = currentLang === 'EN' ? '2081-01-01' : '२०८१-०१-०१';
+                    }
+                }
             }
             resultDisplay.style.display = 'none';
         }
