@@ -104,24 +104,37 @@
             convertBtn.innerText = lang.btnConvert;
             resultLabel.innerText = lang.resultLabel;
             
+            const currentValue = dateInput.value;
+            const currentYear = parseInt(currentValue.split('-')[0]);
+
             if (currentMode === 'ADtoBS') {
                 dateLabel.innerText = lang.labelAD;
                 dateInput.type = 'date';
-                // If switching from BS to AD, reset to today's date
-                if (dateInput.value.length > 10 || (dateInput.value && !dateInput.value.includes('-'))) {
-                   dateInput.value = new Date().toISOString().split('T')[0];
+                
+                // If the current value is clearly not a valid AD date (outside 1944-2033)
+                // or if it contains non-English digits
+                const isInvalidAD = isNaN(currentYear) || currentYear > 2033 || currentYear < 1944 || /[^\x00-\x7F]/.test(currentValue);
+                
+                if (isInvalidAD) {
+                    dateInput.value = new Date().toISOString().split('T')[0];
                 }
             } else {
                 dateLabel.innerText = lang.labelBS;
                 dateInput.type = 'text';
                 dateInput.placeholder = currentLang === 'EN' ? '2081-01-01' : '२०८१-०१-०१';
                 
-                // If it looks like an AD date (YYYY-MM-DD), set a relevant BS example
-                if (dateInput.value.startsWith('19') || dateInput.value.startsWith('20')) {
-                    const parts = dateInput.value.split('-');
-                    if (parts[0] < 2034) { // It's likely an AD year
-                        dateInput.value = currentLang === 'EN' ? '2081-01-01' : '२०८१-०१-०१';
-                    }
+                // If switching from AD mode (year < 2034), set a sensible BS date
+                if (!isNaN(currentYear) && currentYear < 2034) {
+                    dateInput.value = currentLang === 'EN' ? '2081-01-01' : '२०८१-०१-०१';
+                } else if (currentLang === 'NE' && !/[^\x00-\x7F]/.test(currentValue)) {
+                    // Transliterate English BS date to Nepali if language switched to NE
+                    dateInput.value = toNepaliDigits(currentValue);
+                } else if (currentLang === 'EN' && /[^\x00-\x7F]/.test(currentValue)) {
+                    // Transliterate Nepali BS date to English if language switched to EN
+                    dateInput.value = currentValue.split('').map(c => {
+                        const idx = NE_DIGITS.indexOf(c);
+                        return idx !== -1 ? idx : c;
+                    }).join('');
                 }
             }
             resultDisplay.style.display = 'none';
